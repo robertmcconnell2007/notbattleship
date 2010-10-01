@@ -1,12 +1,12 @@
 package game;
-
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.Graphics;
-
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import java.awt.Component;
+import java.util.prefs.BackingStoreException;
 /*
  * Game will create game boards in order to play
  * if playing single-player, game will create 2 GameBoards
@@ -26,7 +26,7 @@ public class Game extends JPanel
 		
 		System.out.println("Hello world!");
 		Component g = new Game();
-		JFrame jf = new JFrame("gameBoard window");
+		JFrame jf = new JFrame("!BattleShip");
 		jf.setSize(800,600);
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
