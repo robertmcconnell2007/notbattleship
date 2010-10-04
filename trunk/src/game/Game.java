@@ -141,6 +141,12 @@ public class Game extends JPanel implements MouseListener, Runnable
 			
 		}
 	}
+	/**
+	 * This function is working as our state machine.
+	 * It will check the current state of the game, and based on the state
+	 * It will do what that state requires the player to do. 
+	 * It will also change state at the end of each action if needed.
+	 */
 	public void checkStates()
 	{
 		if(currentState == States.titleScreen)
