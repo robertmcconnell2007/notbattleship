@@ -1,6 +1,8 @@
 package game;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -72,6 +74,20 @@ public class Game extends JPanel implements MouseListener, Runnable
 	{
 		super.paintComponent(g);
 		/**
+		 * This is to load an image. 
+		 * battleship.gif is my test image.  You can replace it with anything.  Eventually
+		 * it will be our titleScreen
+		 * as long as you put the image in the folder.
+		 * http://www.particle.kth.se/~lindsey/JavaCourse/Book/Part1/Java/Chapter06/images.html
+		 * I put in a bitmap image as well.  I read that java only uses gif, jpg.
+		 * I tested with bitmap, but it doesn't show so everything needs to be either gif or jpg.
+		 */
+		Image titleScreen = Toolkit.getDefaultToolkit().getImage("battleship.gif");
+		if(currentState == States.titleScreen)
+		{
+			g.drawImage(titleScreen, 0,0, this);
+		}
+		/**
 		 * this statement checks to make sure we are at a spot we should be drawing the board
 		 * IE: only draw the board during states: placingShips, player1Turn and player2Turn
 		 */
@@ -80,6 +96,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 			board1.draw(g);
 			board2.draw(g);	
 		}
+		
 	}
 	/**
 	 * this is the default constructor for the game.
@@ -130,7 +147,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 			checkStates();
 			//throttle
 			try{
-				Thread.sleep(100);
+				Thread.sleep(1000);
 			}
 			catch(Exception e){
 			}
