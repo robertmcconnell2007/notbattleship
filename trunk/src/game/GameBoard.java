@@ -1,5 +1,8 @@
 package game;
-
+/*
+ * the game board will be created to store the location of pieces
+ * and the location of shots taken by the player
+ */
 import java.awt.Color;
 import java.awt.Graphics;
 
