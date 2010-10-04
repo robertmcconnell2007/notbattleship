@@ -127,47 +127,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		while(running)
 		{
 			//update
-			if(currentState == States.titleScreen)
-			{
-				//display the title
-				//wait for a click, then change State to States.placingShips
-			}
-			if(currentState == States.handleClick)
-			{
-				currentState = States.placingShips;
-			}
-			if(currentState == States.placingShips)
-			{
-				//player1 placeShipsOnBoard();
-				//computer/player2 placeShipsonBoard();
-				//change state to States.player1Turn
-				currentState = States.player1Turn;
-			}
-			if(currentState == States.player1Turn)
-			{
-				//player1 take your shot
-				//update based on what the shots detail
-				//change state to States.player2Turn;
-				currentState = States.player2Turn;
-			}
-			if(currentState == States.player2Turn)
-			{
-				//computer/player2 take your shot
-				//update based on what the shots detail
-				//change state to States.player1Turn;
-				currentState = States.player1Turn;
-			}
-			
-			//if all of one player's ships are destroyed
-			//change state to States.displayWinner;
-			//currentState = States.displayWinner;
-			//display the Winner
-			//after a mouse click or what not
-			//currentState = States.quitGame;
-			if(currentState == States.quitGame)
-			{
-				running = false;
-			}
+			checkStates();
 			//throttle
 			try{
 				Thread.sleep(100);
@@ -179,6 +139,50 @@ public class Game extends JPanel implements MouseListener, Runnable
 			System.out.println(currentState);
 			repaint();
 			
+		}
+	}
+	public void checkStates()
+	{
+		if(currentState == States.titleScreen)
+		{
+			//display the title
+			//wait for a click, then change State to States.placingShips
+		}
+		else if(currentState == States.handleClick)
+		{
+			currentState = States.placingShips;
+		}
+		else if(currentState == States.placingShips)
+		{
+			//player1 placeShipsOnBoard();
+			//computer/player2 placeShipsonBoard();
+			//change state to States.player1Turn
+			currentState = States.player1Turn;
+		}
+		else if(currentState == States.player1Turn)
+		{
+			//player1 take your shot
+			//update based on what the shots detail
+			//change state to States.player2Turn;
+			currentState = States.player2Turn;
+		}
+		else if(currentState == States.player2Turn)
+		{
+			//computer/player2 take your shot
+			//update based on what the shots detail
+			//change state to States.player1Turn;
+			currentState = States.player1Turn;
+		}
+		
+		//if all of one player's ships are destroyed
+		//change state to States.displayWinner;
+		//currentState = States.displayWinner;
+		//display the Winner
+		//after a mouse click or what not
+		//currentState = States.quitGame;
+		else if(currentState == States.quitGame)
+		{
+			running = false;
 		}
 	}
 
