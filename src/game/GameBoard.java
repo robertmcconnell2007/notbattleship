@@ -91,5 +91,20 @@ public class GameBoard
 		boardY = bY;
 		
 	}
+	/**
+	 * takes input from mouse click and is able to edit the clicked box underneath
+	 * @param clicked x
+	 * @param clicked y
+	 */
+	public void clickBox(int cX, int cY)
+	{
+		int newX = cX / 30;
+		int newY = cY / 30;
+		if(newX >= this.boardW || newY >= this.boardH)
+		{
+			return;
+		}
+		this.playBoard[newX][newY] = 1;
+	}
 }
 

@@ -91,7 +91,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		 * this statement checks to make sure we are at a spot we should be drawing the board
 		 * IE: only draw the board during states: placingShips, player1Turn and player2Turn
 		 */
-		if(currentState == States.placingShips || currentState == States.player1Turn || currentState == States.player2Turn)
+		if(currentState == States.handleClick ||currentState == States.placingShips || currentState == States.player1Turn || currentState == States.player2Turn)
 		{
 			board1.draw(g);
 			board2.draw(g);	
@@ -147,7 +147,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 			checkStates();
 			//throttle
 			try{
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			}
 			catch(Exception e){
 			}
@@ -173,6 +173,14 @@ public class Game extends JPanel implements MouseListener, Runnable
 		}
 		else if(currentState == States.handleClick)
 		{
+			if(clickedX > board2.boardX)
+			{
+				board2.clickBox( (clickedX - board2.boardX) , clickedY);
+			}
+			else
+			{
+				board1.clickBox(clickedX, clickedY);
+			}
 			currentState = States.placingShips;
 		}
 		else if(currentState == States.placingShips)
