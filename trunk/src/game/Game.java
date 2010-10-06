@@ -1,4 +1,5 @@
 package game;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -6,6 +7,8 @@ import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import networking.Message;
 
 import java.awt.Component;
 import java.awt.event.MouseEvent;
@@ -35,6 +38,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		displayWinner,
 		quitGame,
 	}
+	static Message otherPlayer;
 	static GameBoard board1;
 	static GameBoard board2;
 	/**
