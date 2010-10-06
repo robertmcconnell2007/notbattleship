@@ -10,7 +10,6 @@ import javax.swing.JPanel;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.prefs.BackingStoreException;
 /*
  * Game will create game boards in order to play
  * if playing single-player, game will create 2 GameBoards

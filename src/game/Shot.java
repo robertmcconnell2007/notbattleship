@@ -7,6 +7,8 @@ package game;
  * a shot will be created each time a new start and end destination is given
  * when a shot reaches the destination, it is deleted. but not before notifying the
  * board that it has landed.
+ * 
+ * not sure if this will be used as it is not proving very easy.
  */
 public class Shot
 {
