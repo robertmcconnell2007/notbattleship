@@ -43,6 +43,11 @@ public class Game extends JPanel implements MouseListener, Runnable
 	 * Default: titleScreen
 	 */
 	static States currentState = States.titleScreen;
+	
+	/**
+	 * holds the previous state just in case we need it
+	 */
+	static States previousState = currentState;
 	/**
 	 * this is to show whose turn it is.  
 	 * Default: player 1
@@ -93,8 +98,8 @@ public class Game extends JPanel implements MouseListener, Runnable
 		 */
 		if(currentState == States.handleClick ||currentState == States.placingShips || currentState == States.player1Turn || currentState == States.player2Turn)
 		{
-			board1.draw(g);
-			board2.draw(g);	
+			board1.draw(g,true);
+			board2.draw(g,false);	
 		}
 		
 	}
@@ -168,41 +173,60 @@ public class Game extends JPanel implements MouseListener, Runnable
 	{
 		if(currentState == States.titleScreen)
 		{
+			previousState = currentState;
 			//display the title
 			//wait for a click, then change State to States.placingShips
 		}
 		else if(currentState == States.handleClick)
 		{
-			if(clickedX > board2.boardX)
+			if(previousState == States.titleScreen)//if the previous state was just the title, then move on to the real game. TODO: Place ships state needs to start here
 			{
-				board2.clickBox( (clickedX - board2.boardX) , clickedY);
+				currentState = States.player1Turn;
 			}
-			else
+			else if(previousState == States.player1Turn)//if the previous state was player1 taking a turn, assume that player1 just made an attack
 			{
-				board1.clickBox(clickedX, clickedY);
+				if(clickedX > board2.boardX)//check to make sure it was done on board2
+				{
+					if(board2.clickBox( (clickedX - board2.boardX) , clickedY))//valid attack was made
+					{
+						player1 = !player1;//switch players
+					}
+					else
+					{
+						currentState = States.player1Turn;//return back to player1 and make him attempt to move again
+					}
+				}
 			}
-			currentState = States.placingShips;
+			
+			
+			
+			
+			
+			
+			
 		}
 		else if(currentState == States.placingShips)
 		{
 			//player1 placeShipsOnBoard();
 			//computer/player2 placeShipsonBoard();
 			//change state to States.player1Turn
-			currentState = States.player1Turn;
+			//currentState = States.player1Turn;
 		}
 		else if(currentState == States.player1Turn)
 		{
+			previousState = currentState;
 			//player1 take your shot
 			//update based on what the shots detail
 			//change state to States.player2Turn;
-			currentState = States.player2Turn;
+			//currentState = States.player2Turn;
 		}
 		else if(currentState == States.player2Turn)
 		{
+			previousState = currentState;
 			//computer/player2 take your shot
 			//update based on what the shots detail
 			//change state to States.player1Turn;
-			currentState = States.player1Turn;
+			//currentState = States.player1Turn;
 		}
 		
 		//if all of one player's ships are destroyed
@@ -214,6 +238,16 @@ public class Game extends JPanel implements MouseListener, Runnable
 		else if(currentState == States.quitGame)
 		{
 			running = false;
+		}
+		
+		
+		if(player1)
+		{
+			currentState = States.player1Turn;
+		}
+		else
+		{
+			currentState = States.player2Turn;
 		}
 	}
 

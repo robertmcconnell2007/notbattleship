@@ -12,8 +12,6 @@ import java.awt.Graphics;
 
 /**
  * Actual data for the game board.
- * TODO: click to board coordinates?
- * TODO: do I have enough color types, more can be added
  * TODO: gasp in awe of eclipse
  * @author Sean Cox
  */
@@ -39,41 +37,51 @@ public class GameBoard
 	 * where the board draws y
 	 */
 	int boardY;
+
 	/**
 	 * draws the squares of the board according to color
 	 * @param g is the graphics handler
+	 * @param showShips determines whether or not the ships will show up on the board
 	 */
-	public void draw(Graphics g)
+	public void draw(Graphics g, Boolean showShips)
 	{
-		
-
 		for(int y = 0; y < boardH; y++)
 		{
 			for(int x = 0; x < boardW; x++)
 			{
 				switch(playBoard[y][x])
 				{
-				case 0:
-					{
-						g.setColor(new Color(255,0,0));
-						break;
-					}
-				case 1:
-					{
-						g.setColor(new Color(0,255,0));
-						break;
-					}
-				case 2:
+				case 0://empty
 					{
 						g.setColor(new Color(0,0,255));
+						break;
+					}
+				case 1://has ship
+					{
+						if(showShips)
+						{
+							g.setColor(new Color(139,137,137));
+						}
+						else
+						{
+							g.setColor(new Color(0,0,255));
+						}
+						break;
+					}
+				case 2://no hit
+					{
+						g.setColor(new Color(0,255,255));
+						break;
+					}
+				case 3://hit
+					{
+						g.setColor(new Color(255,0,0));
 						break;
 					}
 				}
 				g.fillRect(y*30+boardX,x*30+boardY,29,29);
 			}
 		}
-		
-		
 	}
 	/**
 	 * simple variable initializer and class constructor
@@ -89,22 +97,41 @@ public class GameBoard
 		playBoard = new int[height][width];
 		boardX = bX;
 		boardY = bY;
+		//TODO: Take out after testing
+		for(int i = 0; i < width; i++)
+		{
+			playBoard[i][0] = 1;
+		}
 		
 	}
 	/**
 	 * takes input from mouse click and is able to edit the clicked box underneath
-	 * @param clicked x
-	 * @param clicked y
+	 * is the main attack function for the game at the moment
+	 * @param cX clicked x
+	 * @param cY clicked y
 	 */
-	public void clickBox(int cX, int cY)
+	public Boolean clickBox(int cX, int cY)
 	{
 		int newX = cX / 30;
 		int newY = cY / 30;
-		if(newX >= this.boardW || newY >= this.boardH)
+		if(newX >= this.boardW || newY >= this.boardH)//if out of bounds, attack hasn't been made
 		{
-			return;
+			return false;
 		}
-		this.playBoard[newX][newY] = 1;
+		if(playBoard[newX][newY] == 1)//attack made on enemy ship
+		{
+			playBoard[newX][newY] = 3;
+			return true;
+		}
+		else if(playBoard[newX][newY] == 0)//attack made on open water GJ.
+		{
+			playBoard[newX][newY] = 2;
+			return true;
+		}
+		else//nothing happened with that last shot so you get another one :)
+		{
+			return false;
+		}
 	}
 }
 
