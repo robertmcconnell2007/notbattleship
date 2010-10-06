@@ -186,7 +186,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 			{
 				if(clickedX > board2.boardX)//check to make sure it was done on board2
 				{
-					if(board2.clickBox( (clickedX - board2.boardX) , clickedY))//valid attack was made
+					if(board2.clickBox( (clickedX - board2.boardX)/board2.tileSize , clickedY/board2.tileSize))//valid attack was made TODO: if board 2 is moved, this needs to be fixed
 					{
 						player1 = !player1;//switch players
 					}
@@ -222,6 +222,10 @@ public class Game extends JPanel implements MouseListener, Runnable
 		else if(currentState == States.player2Turn)
 		{
 			previousState = currentState;
+			while(!(board1.clickBox((int)(Math.random()*1000) % board1.boardW, (int)(Math.random() * 1000) % board1.boardH)));
+			player1 = !player1;
+			
+			
 			//computer/player2 take your shot
 			//update based on what the shots detail
 			//change state to States.player1Turn;
