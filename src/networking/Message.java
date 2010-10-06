@@ -3,110 +3,154 @@ package networking;
 import java.io.*;
 import java.net.*;
 
-public class Message
+public class Message implements Runnable
 {
-	private boolean ready;
+	enum States
+	{
+		notReady,
+		hostSetup,
+		clientSetup,	
+		run,
+	}
+
+	static States currentState = States.notReady;
 	private PrintWriter out;
 	private BufferedReader in;
 	private Socket other;
-	private Socket listen;
-	
-	private String messages[];
-	private int numMessages;
-	
+	private ServerSocket listen;
+
+	private String inMessages[];
+	private int numInMessages;
+	private String outMessages[];
+	private int numOutMessages;
+	private String hostName;
+
 	Message()
 	{
-		ready = false;
-		messages = new String[10];
-		numMessages = 0;
+		inMessages = new String[10];
+		numInMessages = 0;
+		outMessages = new String[10];
+		numOutMessages = 0;
+		hostName = null;
 	}
-	public boolean isReady()
+	public void setHostID(String hostID)
 	{
-		return ready;
-	}
-	public boolean setUpHost()
-	{
-		if(!ready)
-		{
-			try
-			{
-				other = new Socket();
-				out = new PrintWriter(other.getOutputStream(),true);
-				in = new BufferedReader(new InputStreamReader(other.getInputStream()));
-				
-			}
-			catch(UnknownHostException e)
-			{
-				System.err.println("Cannot start as host.");
-				System.exit(1);
-			}
-			catch(IOException e)
-			{
-				System.err.println("Could not access I/O as host.");
-				System.exit(1);
-			}
-			return true;
-		}
-		return false;
-	}
-	public boolean setUpClient(String hostIP)
-	{
-		if(!ready)
-		{
-			try
-			{
-				other = new Socket(hostIP, 7);
-				out = new PrintWriter(other.getOutputStream(),true);
-				in = new BufferedReader(new InputStreamReader(other.getInputStream()));
-				
-			}
-			catch(UnknownHostException e)
-			{
-				System.err.println("Cannot connect to host: " + hostIP);
-				System.exit(1);
-			}
-			catch(IOException e)
-			{
-				System.err.println("Could not get I/O for connection to: " + hostIP);
-				System.exit(1);
-			}
-			ready = true;
-			return true;
-		}
-		return false;
-	}
-	public boolean sendMessage(String outMessage)
-	{
-		if(ready)
-		{
-			out.write(outMessage);
-			return true;
-		}
-		return false;
-		
+		hostName = hostID;
 	}
 	public String getMessage()
 	{
-		if(ready)
+		String s = null;
+		if(currentState == States.run)
 		{
-			String message = "InMessage";
-			return message;
+			s = inMessages[0];
+			for(int i = 0; i < numInMessages-1; ++i)
+			{
+				inMessages[i] = inMessages[i+1];
+			}
+			--numInMessages;
 		}
-		return null;
+		return s;
 	}
-	public void shutDown()
+	public void sendMessage(String m)
 	{
-		try
+		outMessages[numOutMessages] = m;
+		++numOutMessages;
+	}
+	public void start(boolean host)
+	{
+		if(host)
 		{
-			out.close();
-			in.close();
-			listen.close();
-			other.close();
+			currentState = States.hostSetup;
 		}
-		catch(IOException e)
+		else
 		{
-			System.err.println("Could not shutdown properly.");
-			System.exit(1);
+			currentState = States.clientSetup;
+		}
+		Thread thread = new Thread(this);
+		thread.start();
+	}
+	public void run()
+	{
+		switch (currentState)
+		{
+		case hostSetup:
+			try
+			{
+				listen = new ServerSocket(4321);
+			}
+			catch (IOException e)
+			{
+				System.out.println("Could not listen on port 4321");
+				System.exit(-1);
+			}
+			try
+			{
+				other = listen.accept();
+			}
+			catch (IOException e)
+			{
+				System.out.println("Accept failed: 4321");
+				System.exit(-1);
+			}
+			try
+			{
+				in = new BufferedReader(new InputStreamReader(other.getInputStream()));
+				out = new PrintWriter(other.getOutputStream(), true);
+			}
+			catch (IOException e)
+			{
+				System.out.println("Read failed");
+				System.exit(-1);
+			}
+			break;
+		case clientSetup:
+			if(hostName != null)
+			{
+				try
+				{
+					other = new Socket(hostName, 4321);
+					out = new PrintWriter(other.getOutputStream(), true);
+					in = new BufferedReader(new InputStreamReader(other.getInputStream()));
+				}
+				catch (UnknownHostException e)
+				{
+					System.out.println("Unknown host: " + hostName);
+					System.exit(1);
+				}
+				catch (IOException e)
+				{
+					System.out.println("No I/O");
+					System.exit(1);
+				}
+			}
+			break;
+		case run:
+		{
+			if(numOutMessages > 0)
+			{
+				out.write(outMessages[0]);
+				out.flush();
+				for(int i = 0; i < numOutMessages-1; ++i)
+				{
+					outMessages[i] = outMessages[i+1];
+				}
+				--numOutMessages;			}
+			}
+			try
+			{
+				String temp = in.readLine();
+				if(temp != null)
+				{
+					inMessages[numInMessages] = temp;
+					++numInMessages;
+				}
+			}
+			catch (IOException e)
+			{
+				System.err.println("Error Reading from buffer");
+				System.exit(1);
+			}
+			break;
 		}
 	}
 }
