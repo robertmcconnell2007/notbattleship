@@ -24,7 +24,8 @@ public class Piece
 	public void generatePiece(int t)
 	{
 		type = t;
-		
+		//ERNEST I'M MAKING THIS EASIER FOR YOU
+		// shipSize = 5-type;
 		switch (type)
 		{
 		//carrier
@@ -120,6 +121,8 @@ public class Piece
 	public void copyPiece(Piece other)
 	{
 		type = other.type;
+		//ERNEST I'M MAKING THIS EASIER FOR YOU
+		//shipSize = other.shipSize;
 		switch (type)
 		{
 		//carrier
