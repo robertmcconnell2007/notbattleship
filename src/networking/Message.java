@@ -71,70 +71,74 @@ public class Message implements Runnable
 	}
 	public void run()
 	{
-		switch (currentState)
+		while(true)
 		{
-		case hostSetup:
-			try
+			switch (currentState)
 			{
-				listen = new ServerSocket(4321);
-			}
-			catch (IOException e)
-			{
-				System.out.println("Could not listen on port 4321");
-				System.exit(-1);
-			}
-			try
-			{
-				other = listen.accept();
-			}
-			catch (IOException e)
-			{
-				System.out.println("Accept failed: 4321");
-				System.exit(-1);
-			}
-			try
-			{
-				in = new BufferedReader(new InputStreamReader(other.getInputStream()));
-				out = new PrintWriter(other.getOutputStream(), true);
-			}
-			catch (IOException e)
-			{
-				System.out.println("Read failed");
-				System.exit(-1);
-			}
-			break;
-		case clientSetup:
-			if(hostName != null)
-			{
+			case hostSetup:
 				try
 				{
-					other = new Socket(hostName, 4321);
-					out = new PrintWriter(other.getOutputStream(), true);
-					in = new BufferedReader(new InputStreamReader(other.getInputStream()));
-				}
-				catch (UnknownHostException e)
-				{
-					System.out.println("Unknown host: " + hostName);
-					System.exit(1);
+					listen = new ServerSocket(4321);
 				}
 				catch (IOException e)
 				{
-					System.out.println("No I/O");
-					System.exit(1);
+					System.out.println("Could not listen on port 4321");
+					System.exit(-1);
 				}
-			}
-			break;
-		case run:
-		{
-			if(numOutMessages > 0)
-			{
-				out.write(outMessages[0]);
-				out.flush();
-				for(int i = 0; i < numOutMessages-1; ++i)
+				try
 				{
-					outMessages[i] = outMessages[i+1];
+					other = listen.accept();
 				}
-				--numOutMessages;			}
+				catch (IOException e)
+				{
+					System.out.println("Accept failed: 4321");
+					System.exit(-1);
+				}
+				try
+				{
+					in = new BufferedReader(new InputStreamReader(other.getInputStream()));
+					out = new PrintWriter(other.getOutputStream(), true);
+				}
+				catch (IOException e)
+				{
+					System.out.println("Read failed");
+					System.exit(-1);
+				}
+				currentState = States.run;
+				break;
+			case clientSetup:
+				if(hostName != null)
+				{
+					try
+					{
+						other = new Socket(hostName, 4321);
+						out = new PrintWriter(other.getOutputStream(), true);
+						in = new BufferedReader(new InputStreamReader(other.getInputStream()));
+					}
+					catch (UnknownHostException e)
+					{
+						System.out.println("Unknown host: " + hostName);
+						System.exit(1);
+					}
+					catch (IOException e)
+					{
+						System.out.println("No I/O");
+						System.exit(1);
+					}
+				}
+				currentState = States.run;
+				break;
+			case run:
+			{
+				if(numOutMessages > 0)
+				{
+					out.write(outMessages[0]);
+					out.flush();
+					for(int i = 0; i < numOutMessages-1; ++i)
+					{
+						outMessages[i] = outMessages[i+1];
+					}
+					--numOutMessages;			}
 			}
 			try
 			{
@@ -151,6 +155,7 @@ public class Message implements Runnable
 				System.exit(1);
 			}
 			break;
+			}
 		}
 	}
 }
