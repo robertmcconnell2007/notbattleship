@@ -39,6 +39,10 @@ public class GameBoard
 	int boardY;
 
 	/**
+	 * size of drawn tile
+	 */
+	int tileSize;
+	/**
 	 * draws the squares of the board according to color
 	 * @param g is the graphics handler
 	 * @param showShips determines whether or not the ships will show up on the board
@@ -79,7 +83,7 @@ public class GameBoard
 						break;
 					}
 				}
-				g.fillRect(y*30+boardX,x*30+boardY,29,29);
+				g.fillRect(y*tileSize+boardX,x*tileSize+boardY,29,29);
 			}
 		}
 	}
@@ -97,6 +101,7 @@ public class GameBoard
 		playBoard = new int[height][width];
 		boardX = bX;
 		boardY = bY;
+		tileSize = 30;
 		//TODO: Take out after testing
 		for(int i = 0; i < width; i++)
 		{
@@ -110,10 +115,9 @@ public class GameBoard
 	 * @param cX clicked x
 	 * @param cY clicked y
 	 */
-	public Boolean clickBox(int cX, int cY)
+	public Boolean clickBox(int newX, int newY)
 	{
-		int newX = cX / 30;
-		int newY = cY / 30;
+		
 		if(newX >= this.boardW || newY >= this.boardH)//if out of bounds, attack hasn't been made
 		{
 			return false;
