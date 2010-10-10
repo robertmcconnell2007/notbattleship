@@ -58,55 +58,84 @@ public class GameBoard
 		{
 			for(int x = 0; x < boardW; x++)
 			{
-				switch(playBoard[y][x])
+				if(showShips)
 				{
-				case 0://shipArray0
+					switch(playBoard[y][x])
 					{
-						g.setColor(new Color(0,255,0));
-						break;
+					case 0://shipArray0
+						{	
+							g.setColor(new Color(0,255,0));
+							break;
+						}
+					case 1://shipArray1
+						{
+							g.setColor(new Color(0,100,0));
+							break;
+						}
+					case 2://shipArray2
+						{
+							g.setColor(new Color(0,255,255));
+							break;
+						}
+					case 3://ShipArray3
+						{
+							g.setColor(new Color(255,255,0));
+							break;
+						}
+					case 4://shipArray4
+						{
+							g.setColor(new Color(255,0,255));
+							break;
+						}					
+					case 5://water
+						{
+							g.setColor(new Color(0,0,255));
+							break;
+						}
+					case 6://hit
+						{
+							g.setColor(new Color(255,0,0));
+							break;
+						}
+					case 7://miss
+						{
+							g.setColor(new Color(255,255,255));
+							break;
+						}
 					}
-				case 1://shipArray1
+				}
+				else
+				{
+					switch(playBoard[y][x])
 					{
-						g.setColor(new Color(0,100,0));
-						break;
-					}
-				case 2://shipArray2
-					{
-						g.setColor(new Color(0,255,255));
-						break;
-					}
-				case 3://ShipArray3
-					{
-						g.setColor(new Color(255,255,0));
-						break;
-					}
-				case 4://shipArray4
-					{
-						g.setColor(new Color(255,0,255));
-						break;
-					}
-				case 5://water
-					{
-						g.setColor(new Color(0,0,255));
-						break;
-					}
-				case 6://hit
-					{
-						g.setColor(new Color(255,0,0));
-						break;
-					}
-				case 7://miss
-					{
-						g.setColor(new Color(255,255,255));
-						break;
-					}
+					case 0://shipArray0
+					case 1://shipArray1
+					case 2://shipArray2
+					case 3://ShipArray3
+					case 4://shipArray4
+					case 5://water
+						{
+							g.setColor(new Color(0,0,255));
+							break;
+						}
+					case 6://hit
+						{
+							g.setColor(new Color(255,0,0));
+							break;
+						}
+					case 7://miss
+						{
+							g.setColor(new Color(255,255,255));
+							break;
+						}
+				}
 				}
 				g.fillRect(y*tileSize+boardX,x*tileSize+boardY,29,29);
 			}
 		}
 		if(shipCounter != -1 && showShips)
 		{
-			shipArray[shipCounter].draw(g);
+			shipArray[shipCounter].draw(g,boardX,boardY);
 		}
 	}
 	/**
