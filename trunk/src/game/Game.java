@@ -92,6 +92,10 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	static Rect nextTurnButton;
 	static Rect yesButton;
 	static Rect noButton;
+	/**
+	 * rect for shots
+	 */
+	static Rect shotRect;
 	
 	public static void main(String[] args)
 	{
@@ -175,13 +179,34 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			if(currentState != States.changingChairs || AIPlayer)
 			{
 				boolean showShips = false;
+				int xpos = 0, ypos = 0;
+				if(salvo)
+				{
+					xpos = board1.boardX + 5;
+					ypos = board1.boardY+(board1.boardH*board1.tileSize) + 5;
+				}
 				if(currentState == States.player1Turn || AIPlayer)
 					showShips = true;
 				g.setColor(new Color(255,0,0));
 				if(currentState == States.player1Turn)
 					g.fillRect(board2.boardX-5, board2.boardY-5, (board2.boardW*board2.tileSize)+10, (board2.boardH*board2.tileSize)+10);
 				else
+				{
+					if(salvo)
+					{
+						xpos = board2.boardX;
+						ypos = board2.boardY+(board2.boardH*board2.tileSize) + 5;
+					}
 					g.fillRect(board1.boardX-5, board1.boardY-5, (board1.boardW*board1.tileSize)+10, (board1.boardH*board1.tileSize)+10);
+				}
+				if(salvo)
+				{
+					for(int i = 0; i < shotsRemaining; ++i)
+					{
+						g.fillRect(xpos, ypos, shotRect.w, shotRect.h);
+						xpos = xpos + 5 + shotRect.w; 
+					}
+				}
 				board1.draw(g,showShips);
 				board2.draw(g,!showShips);
 			}
@@ -214,6 +239,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		nextTurnButton = new Rect(340,125,100,50);
 		yesButton = new Rect(10,60,100,50);
 		noButton = new Rect(10,120,100,50);
+		shotRect = new Rect(0,0,10,10);
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		Thread thread = new Thread(this);
@@ -395,7 +421,8 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			if(AIPlayer)
 			{
 				while(!(board1.clickBox((int)(Math.random()*1000) % board1.boardW, (int)(Math.random() * 1000) % board1.boardH)));
-				currentState = States.changingChairs;
+				if(--shotsRemaining <= 0)
+					currentState = States.changingChairs;
 			}
 			else
 			{
@@ -440,14 +467,21 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			}
 			if(hasClicked || AIPlayer)
 			{
-				if(nextTurnButton.isIn(clickedX, clickedY))
+				if(nextTurnButton.isIn(clickedX, clickedY) || AIPlayer)
 				{
 					previousState = currentState;
 					currentState = newState;
-					if(currentState == States.player1Turn || currentState == States.player2Turn)
+					if(currentState == States.player1Turn)
 					{
 						if(salvo)
-							shotsRemaining = 5;
+							shotsRemaining = 5;//shotsRemaining = board1.countShips();
+						else
+							shotsRemaining = 1;
+					}
+					if(currentState == States.player2Turn)
+					{
+						if(salvo)
+							shotsRemaining = 5;//shotsRemaining = board2.countShips();
 						else
 							shotsRemaining = 1;
 					}
