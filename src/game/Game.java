@@ -11,12 +11,13 @@ import javax.swing.JPanel;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 /*
  * Game will create game boards in order to play
  * if playing single-player, game will create 2 GameBoards
  * if playing multi-player, game will set up networking
  */
-public class Game extends JPanel implements MouseListener, Runnable
+public class Game extends JPanel implements MouseListener, Runnable, MouseMotionListener
 {
 	/**
 	 * 
@@ -53,7 +54,9 @@ public class Game extends JPanel implements MouseListener, Runnable
 	 * sets up the current state the game is in.
 	 * Default: titleScreen
 	 */
+
 	static States currentState = States.titleScreen;
+	
 	/**
 	 * holds the previous state just in case we need it
 	 */
@@ -65,8 +68,10 @@ public class Game extends JPanel implements MouseListener, Runnable
 	static boolean player1 = true;
 	/**
 	 * user clicked, the clickedX and clickedY will store the location of the click
+	 * user clicked rotate
 	 */
 	static boolean hasClicked;
+	static boolean hasRotateClicked;
 	/**
 	 * this will hold the X position of where a player clicked.
 	 */
@@ -82,16 +87,12 @@ public class Game extends JPanel implements MouseListener, Runnable
 	
 	public static void main(String[] args)
 	{
-		
-		System.out.println("Hello world!");
 		Component g = new Game();
 		JFrame jf = new JFrame("!BattleShip");
 		jf.setSize(800,600);
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.add(g);
-	
-		
 	}
 	public void paintComponent(Graphics g)
 	{
@@ -115,7 +116,28 @@ public class Game extends JPanel implements MouseListener, Runnable
 		 * this statement checks to make sure we are at a spot we should be drawing the board
 		 * IE: only draw the board during states: placingShips, player1Turn and player2Turn
 		 */
-		if(currentState == States.placingShipsPlayer1 || currentState == States.placingShipsPlayer2 || currentState == States.player1Turn || currentState == States.player2Turn || currentState == States.changingChairs)
+		if(currentState == States.placingShipsPlayer1 || currentState == States.placingShipsPlayer2)
+		{
+			if(currentState != States.changingChairs || AIPlayer)
+			{
+				boolean showShips = false;
+				if(currentState == States.placingShipsPlayer1 || AIPlayer)
+					showShips = true;
+				g.setColor(new Color(255,0,0));
+				board1.draw(g,showShips);
+				board2.draw(g,!showShips);
+			}
+			else
+			{
+				board1.draw(g,false);
+				board2.draw(g,false);
+				g.setColor(new Color(255,0,0));
+				g.fillRoundRect(nextTurnButton.x, nextTurnButton.y, nextTurnButton.w, nextTurnButton.h, 25, 25);
+				g.setColor(new Color(0,0,0));
+				g.drawString("Next Player", nextTurnButton.x + 25, nextTurnButton.y + 25);
+			}
+		}
+		if(currentState == States.player1Turn || currentState == States.player2Turn || currentState == States.changingChairs)
 		{
 			if(currentState != States.changingChairs || AIPlayer)
 			{
@@ -157,12 +179,10 @@ public class Game extends JPanel implements MouseListener, Runnable
 		board1 = new GameBoard(10,10,0,0);
 		board2 = new GameBoard(10,10,480,0);
 		nextTurnButton = new Rect(340,125,100,50);
-		System.out.println("initialized next turn button");
 		addMouseListener(this);
-		System.out.println("added mouse listener");
+		addMouseMotionListener(this);
 		Thread thread = new Thread(this);
 		thread.start();
-		System.out.println("added thread");
 	}
 
 	/**
@@ -179,7 +199,6 @@ public class Game extends JPanel implements MouseListener, Runnable
 			//set all the ships of the current player, then return when done.
 			//if(shipCount is greater than number of ships I can have, done = true;
 			//draw
-			System.out.print("Placing Ships");
 			done = true;
 		}
 	}
@@ -203,8 +222,6 @@ public class Game extends JPanel implements MouseListener, Runnable
 			catch(Exception e){
 			}
 			//draw
-			//this is just testing.  It will print out the current State
-			//System.out.println(currentState);
 			repaint();
 			
 		}
@@ -217,26 +234,52 @@ public class Game extends JPanel implements MouseListener, Runnable
 	 */
 	public void checkStates()
 	{
+		System.out.println(currentState);
 		if(currentState == States.titleScreen)
 		{
 			previousState = currentState;
 			//display the title
 			//wait for a click, then change State to States.placingShips
 			if(hasClicked)
-				currentState = States.player1Turn;
+				currentState = States.placingShipsPlayer1;
 		}
 		//TODO: add state for selecting versus AI or versus Player
 		//TODO: add state for selecting salvo or regular shots
 		else if(currentState == States.placingShipsPlayer1)
 		{
-			//player1 placeShipsOnBoard();
-			//change state to player2 place ships
+			if(hasRotateClicked)
+				board1.shipArray[board1.shipCounter].rotate();
+			if(hasClicked)
+			{
+				if(board1.transposeShip())
+				{
+					if(board1.shipCounter == -1)
+					{
+						previousState = currentState;
+						currentState = States.changingChairs;
+					}
+				}
+			}
+			if(board1.shipCounter != -1)
+				board1.shipArray[board1.shipCounter].setPosition(clickedX/board1.tileSize , clickedY/board1.tileSize);
 		}
 		else if(currentState == States.placingShipsPlayer2)
 		{
-			//player2 placeShipsonBoard();
-			//change state to States.player1Turn
-			//currentState = States.player1Turn;
+			if(hasRotateClicked)
+				board2.shipArray[board2.shipCounter].rotate();
+			if(hasClicked)
+			{
+				if(board2.transposeShip())
+				{
+					if(board2.shipCounter == -1)
+					{
+						previousState = currentState;
+						currentState = States.changingChairs;
+					}
+				}
+			}
+			if(board2.shipCounter != -1)
+				board2.shipArray[board2.shipCounter].setPosition(clickedX/board2.tileSize , clickedY/board2.tileSize);
 		}
 		else if(currentState == States.player1Turn)
 		{
@@ -247,10 +290,8 @@ public class Game extends JPanel implements MouseListener, Runnable
 			previousState = currentState;
 			if(hasClicked)
 			{
-				System.out.println("HasClicked in: " + clickedX + "x " + clickedY + "y");
 				if(board2.clickedIn(clickedX, clickedY))
 				{
-					System.out.println("in board 2 range");
 					if(board2.clickBox((clickedX-board2.boardX)/board2.tileSize, (clickedY-board2.boardY)/board2.tileSize))
 					{
 						currentState = States.changingChairs;
@@ -295,7 +336,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 			}
 			else if(previousState == States.placingShipsPlayer2)
 			{
-				newState = States.placingShipsPlayer1;
+				newState = States.player1Turn;
 			}
 			else if(previousState == States.player1Turn)
 			{
@@ -308,7 +349,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 			else
 			{
 				System.out.println("did not enter changingChairs from the proper state.");
-				newState = States.titleScreen;
+				newState = currentState;
 			}
 			if(hasClicked || AIPlayer)
 			{
@@ -334,37 +375,42 @@ public class Game extends JPanel implements MouseListener, Runnable
 			running = false;
 		}
 		hasClicked = false;
-				
-		
-		//if(player1)
-		//{
-		//	currentState = States.player1Turn;
-		//}
-		//else
-		//{
-		//	currentState = States.player2Turn;
-		//}
+		hasRotateClicked = false;
 	}
 
 	public void mouseClicked(MouseEvent e)
-	{
+	{		
 	}
 	public void mouseEntered(MouseEvent e)
 	{
 	}
+	
 	public void mouseExited(MouseEvent e)
 	{
 	}
 	public void mousePressed(MouseEvent e)
 	{
-		hasClicked = true;
+		if(e.getButton() == MouseEvent.BUTTON3)
+		{
+			hasRotateClicked = true;
+		}
+		else
+			hasClicked = true;
 		clickedX = e.getX();
 		clickedY = e.getY();
-		System.out.println(e.getX() + " " + e.getY());
-
 	}
 	public void mouseReleased(MouseEvent e)
 	{		
+	}
+	
+	public void mouseDragged(MouseEvent e)
+	{
+	}
+	
+	public void mouseMoved(MouseEvent e) 
+	{
+		clickedX = e.getX();
+		clickedY = e.getY();
 	}
 	
 	
