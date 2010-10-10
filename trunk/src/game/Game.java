@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -7,18 +8,15 @@ import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import networking.Message;
-
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 /*
  * Game will create game boards in order to play
  * if playing single-player, game will create 2 GameBoards
  * if playing multi-player, game will set up networking
  */
-public class Game extends JPanel implements MouseListener, Runnable, MouseMotionListener
+public class Game extends JPanel implements MouseListener, Runnable
 {
 	/**
 	 * 
@@ -31,23 +29,31 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	enum States
 	{
 		titleScreen,
-		placingShips,	
+		placingShipsPlayer1,
+		placingShipsPlayer2,
 		player1Turn,
+		changingChairs,
 		player2Turn,
-		handleClick,
 		displayWinner,
 		quitGame,
-		networkTest,
 	}
-	static Message otherPlayer;
+	//static Message otherPlayer;
 	static GameBoard board1;
 	static GameBoard board2;
+	
+	/**
+	 * playing versus an AI
+	 */
+	static boolean AIPlayer = false;
+	/**
+	 * ready boolean that states the player is ready
+	 */
+	static boolean readyPressed = false;
 	/**
 	 * sets up the current state the game is in.
 	 * Default: titleScreen
 	 */
 	static States currentState = States.titleScreen;
-	
 	/**
 	 * holds the previous state just in case we need it
 	 */
@@ -58,6 +64,10 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	 */
 	static boolean player1 = true;
 	/**
+	 * user clicked, the clickedX and clickedY will store the location of the click
+	 */
+	static boolean hasClicked;
+	/**
 	 * this will hold the X position of where a player clicked.
 	 */
 	int clickedX = 0;
@@ -65,6 +75,10 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	 * this will hold the Y position of where a player clicked.
 	 */
 	int clickedY = 0;
+	/**
+	 * rectData for center button
+	 */
+	static Rect nextTurnButton;
 	
 	public static void main(String[] args)
 	{
@@ -76,7 +90,6 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.add(g);
-		//otherPlayer.start(true);
 	
 		
 	}
@@ -92,19 +105,44 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		 * I put in a bitmap image as well.  I read that java only uses gif, jpg.
 		 * I tested with bitmap, but it doesn't show so everything needs to be either gif or jpg.
 		 */
-		Image titleScreen = Toolkit.getDefaultToolkit().getImage("battleship.gif");
+
 		if(currentState == States.titleScreen)
 		{
+			Image titleScreen = Toolkit.getDefaultToolkit().getImage("battleship.gif");
 			g.drawImage(titleScreen, 0,0, this);
 		}
 		/**
 		 * this statement checks to make sure we are at a spot we should be drawing the board
 		 * IE: only draw the board during states: placingShips, player1Turn and player2Turn
 		 */
-		if(currentState == States.handleClick ||currentState == States.placingShips || currentState == States.player1Turn || currentState == States.player2Turn)
+		if(currentState == States.placingShipsPlayer1 || currentState == States.placingShipsPlayer2 || currentState == States.player1Turn || currentState == States.player2Turn || currentState == States.changingChairs)
 		{
-			board1.draw(g,true);
-			board2.draw(g,false);	
+			if(currentState != States.changingChairs || AIPlayer)
+			{
+				boolean showShips = false;
+				if(currentState == States.player1Turn || AIPlayer)
+					showShips = true;
+				g.setColor(new Color(255,0,0));
+				if(currentState == States.player1Turn)
+					g.fillRect(board2.boardX-5, board2.boardY-5, (board2.boardW*board2.tileSize)+10, (board2.boardH*board2.tileSize)+10);
+				else
+					g.fillRect(board1.boardX-5, board1.boardY-5, (board1.boardW*board1.tileSize)+10, (board1.boardH*board1.tileSize)+10);
+				board1.draw(g,showShips);
+				board2.draw(g,!showShips);
+			}
+			else
+			{
+				board1.draw(g,false);
+				board2.draw(g,false);
+				g.setColor(new Color(255,0,0));
+				g.fillRoundRect(nextTurnButton.x, nextTurnButton.y, nextTurnButton.w, nextTurnButton.h, 25, 25);
+				g.setColor(new Color(0,0,0));
+				g.drawString("Next Player", nextTurnButton.x + 25, nextTurnButton.y + 25);
+			}
+		}
+		if(currentState == States.displayWinner)
+		{
+			//TODO: draw the winner's name (player1 or player2)
 		}
 		
 	}
@@ -118,10 +156,13 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	{
 		board1 = new GameBoard(10,10,0,0);
 		board2 = new GameBoard(10,10,480,0);
+		nextTurnButton = new Rect(340,125,100,50);
+		System.out.println("initialized next turn button");
 		addMouseListener(this);
-		addMouseMotionListener(this);
+		System.out.println("added mouse listener");
 		Thread thread = new Thread(this);
 		thread.start();
+		System.out.println("added thread");
 	}
 
 	/**
@@ -139,7 +180,6 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			//if(shipCount is greater than number of ships I can have, done = true;
 			//draw
 			System.out.print("Placing Ships");
-			repaint();
 			done = true;
 		}
 	}
@@ -164,7 +204,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			}
 			//draw
 			//this is just testing.  It will print out the current State
-			System.out.println(currentState);
+			//System.out.println(currentState);
 			repaint();
 			
 		}
@@ -182,54 +222,106 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			previousState = currentState;
 			//display the title
 			//wait for a click, then change State to States.placingShips
+			if(hasClicked)
+				currentState = States.player1Turn;
 		}
-		else if(currentState == States.handleClick)
-		{
-			if(previousState == States.titleScreen)//if the previous state was just the title, then move on to the real game. TODO: Place ships state needs to start here
-			{
-				currentState = States.placingShips;
-			}
-			else if(previousState == States.player1Turn)//if the previous state was player1 taking a turn, assume that player1 just made an attack
-			{
-				if(clickedX > board2.boardX)//check to make sure it was done on board2
-				{
-					if(board2.clickBox((clickedX - board2.boardX)/board2.tileSize , clickedY/board2.tileSize))//valid attack was made TODO: if board 2 is moved, this needs to be fixed
-					{
-						player1 = !player1;//switch players
-					}
-					else
-					{
-						currentState = States.player1Turn;//return back to player1 and make him attempt to move again
-					}
-				}
-			}	
-		}
-		else if(currentState == States.placingShips)
+		//TODO: add state for selecting versus AI or versus Player
+		//TODO: add state for selecting salvo or regular shots
+		else if(currentState == States.placingShipsPlayer1)
 		{
 			//player1 placeShipsOnBoard();
-			//computer/player2 placeShipsonBoard();
+			//change state to player2 place ships
+		}
+		else if(currentState == States.placingShipsPlayer2)
+		{
+			//player2 placeShipsonBoard();
 			//change state to States.player1Turn
 			//currentState = States.player1Turn;
 		}
 		else if(currentState == States.player1Turn)
 		{
-			previousState = currentState;
 			//player1 take your shot
 			//update based on what the shots detail
 			//change state to States.player2Turn;
 			//currentState = States.player2Turn;
+			previousState = currentState;
+			if(hasClicked)
+			{
+				System.out.println("HasClicked in: " + clickedX + "x " + clickedY + "y");
+				if(board2.clickedIn(clickedX, clickedY))
+				{
+					System.out.println("in board 2 range");
+					if(board2.clickBox((clickedX-board2.boardX)/board2.tileSize, (clickedY-board2.boardY)/board2.tileSize))
+					{
+						currentState = States.changingChairs;
+					}					
+				}
+			}
 		}
 		else if(currentState == States.player2Turn)
 		{
-			previousState = currentState;
-			while(!(board1.clickBox((int)(Math.random()*1000) % board1.boardW, (int)(Math.random() * 1000) % board1.boardH)));
-			player1 = !player1;
-			
-			
 			//computer/player2 take your shot
 			//update based on what the shots detail
 			//change state to States.player1Turn;
 			//currentState = States.player1Turn;
+			previousState = currentState;
+			if(AIPlayer)
+			{
+				while(!(board1.clickBox((int)(Math.random()*1000) % board1.boardW, (int)(Math.random() * 1000) % board1.boardH)));
+				currentState = States.changingChairs;
+			}
+			else
+			{
+				if(hasClicked)
+				{
+					if(board1.clickedIn(clickedX, clickedY))
+					{
+						if(board1.clickBox((clickedX-board1.boardX)/board1.tileSize, (clickedY-board1.boardY)/board1.tileSize))
+						{
+							currentState = States.changingChairs;
+						}
+					}
+				}
+			}
+			
+			
+		}
+		else if(currentState == States.changingChairs)
+		{
+			States newState;
+			if(previousState == States.placingShipsPlayer1)
+			{
+				newState = States.placingShipsPlayer2;
+			}
+			else if(previousState == States.placingShipsPlayer2)
+			{
+				newState = States.placingShipsPlayer1;
+			}
+			else if(previousState == States.player1Turn)
+			{
+				newState = States.player2Turn;
+			}
+			else if(previousState == States.player2Turn)
+			{
+				newState = States.player1Turn;
+			}
+			else
+			{
+				System.out.println("did not enter changingChairs from the proper state.");
+				newState = States.titleScreen;
+			}
+			if(hasClicked || AIPlayer)
+			{
+				if(nextTurnButton.isIn(clickedX, clickedY))
+				{
+					previousState = currentState;
+					currentState = newState;
+				}
+			}
+		}
+		else if(currentState == States.displayWinner)
+		{
+			//TODO: determine whom is the winner
 		}
 		//if all of one player's ships are destroyed
 		//change state to States.displayWinner;
@@ -241,76 +333,38 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		{
 			running = false;
 		}
-
+		hasClicked = false;
+				
 		
-		/*if(currentState != States.placingShips)
-		{
-			if(player1)
-			{
-				currentState = States.player1Turn;
-			}
-			else
-			{
-				currentState = States.player2Turn;
-			}
-		}*/
+		//if(player1)
+		//{
+		//	currentState = States.player1Turn;
+		//}
+		//else
+		//{
+		//	currentState = States.player2Turn;
+		//}
 	}
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if(currentState == States.placingShips)
-		{
-			if(e.getButton() == e.BUTTON3)
-			{
-				board1.shipArray[board1.shipCounter].rotate();
-			}
-			else if(e.getButton() == e.BUTTON1)
-			{
-				if(board1.transposeShip())
-				{
-					if(board1.shipCounter == -1)
-					{
-						currentState = States.player1Turn;
-					}
-				}
-			}
-		}
-		currentState = States.handleClick;
-		clickedX = e.getX();
-		clickedY = e.getY();
-		
 	}
 	public void mouseEntered(MouseEvent e)
 	{
 	}
-	
 	public void mouseExited(MouseEvent e)
 	{
 	}
 	public void mousePressed(MouseEvent e)
 	{
-		/*currentState = States.handleClick;
+		hasClicked = true;
 		clickedX = e.getX();
 		clickedY = e.getY();
 		System.out.println(e.getX() + " " + e.getY());
-		repaint();*/
+
 	}
 	public void mouseReleased(MouseEvent e)
 	{		
-	}
-	
-	public void mouseDragged(MouseEvent e)
-	{
-	}
-	
-	public void mouseMoved(MouseEvent e) 
-	{
-		if(currentState == States.placingShips && board1.shipCounter != -1)
-		{
-			clickedX = e.getX();
-			clickedY = e.getY();
-			board1.shipArray[board1.shipCounter].setPosition(clickedX/board1.tileSize , clickedY/board1.tileSize);
-		}
 	}
 	
 	
