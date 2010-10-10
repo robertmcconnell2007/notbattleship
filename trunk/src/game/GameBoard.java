@@ -193,16 +193,21 @@ public class GameBoard
 		}
 		else
 		{
+			shipArray[playBoard[newX][newY]].decHealth();
 			playBoard[newX][newY] = 6;
 			return true;
 		}
 	}
+	
+	
 	public boolean clickedIn(int x, int y)
 	{
 		if(x > boardX && x < boardX+(boardW*tileSize) && y > boardY && y < boardY+(boardH*tileSize))
 			return true;
 		return false;
 	}
+	
+	
 	public boolean transposeShip()
 	{
 		//if the ship is out of bounds of the board
@@ -257,6 +262,19 @@ public class GameBoard
 		if(shipCounter > 4)
 		{
 			shipCounter = -1;
+		}
+		return true;
+	}
+	
+	
+	public boolean checkWin()
+	{
+		for(int i = 0; i < 5; i++)
+		{
+			if(shipArray[i].health != 0)
+			{
+				return false;
+			}
 		}
 		return true;
 	}

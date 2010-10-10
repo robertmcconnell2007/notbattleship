@@ -97,6 +97,8 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	 */
 	static Rect shotRect;
 	
+	static boolean winner;
+	
 	public static void main(String[] args)
 	{
 		Component g = new Game();
@@ -490,6 +492,22 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		else if(currentState == States.displayWinner)
 		{
 			//TODO: determine whom is the winner
+			if(!winner)
+			{
+				//player 1 won
+			}
+			else
+			{
+				//player 2 won
+			}
+		
+			
+			
+			
+			
+			
+			
+			
 		}
 		//if all of one player's ships are destroyed
 		//change state to States.displayWinner;
@@ -499,11 +517,29 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		//currentState = States.quitGame;
 		else if(currentState == States.quitGame)
 		{
+			
+			
+			
+			
+			
+			
 			running = false;
 		}
 		//TODO: check each board for a winner
 		hasClicked = false;
 		hasRotateClicked = false;
+		if(board1.checkWin())
+		{
+			previousState = currentState;
+			currentState = States.displayWinner;
+			winner = false;
+		}
+		if(board2.checkWin())
+		{
+			previousState = currentState;
+			currentState = States.displayWinner;
+			winner = true;
+		}
 	}
 
 	public void mouseClicked(MouseEvent e)
