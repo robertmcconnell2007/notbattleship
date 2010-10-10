@@ -103,7 +103,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	{
 		Component g = new Game();
 		JFrame jf = new JFrame("!BattleShip");
-		jf.setSize(800,600);
+		jf.setSize(820,380);
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.add(g);
@@ -224,9 +224,22 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		}
 		if(currentState == States.displayWinner)
 		{
+			board1.draw(g,true);
+			board2.draw(g,true);
 			//TODO: draw the winner's name (player1 or player2)
+			g.setColor(new Color(255,0,0));
+			g.fillRoundRect(nextTurnButton.x, nextTurnButton.y, nextTurnButton.w, nextTurnButton.h, 25, 25);
+			g.setColor(new Color(0,0,0));
+			
+			if(winner)
+			{
+				g.drawString("Player 1 wins!", nextTurnButton.x + 12, nextTurnButton.y + 25);
+			}
+			else
+			{
+				g.drawString("Player 2 wins!", nextTurnButton.x + 12, nextTurnButton.y + 25);
+			}
 		}
-		
 	}
 	/**
 	 * this is the default constructor for the game.
@@ -236,8 +249,8 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	 */
 	Game()
 	{
-		board1 = new GameBoard(10,10,0,0);
-		board2 = new GameBoard(10,10,480,0);
+		board1 = new GameBoard(10,10,10,10);
+		board2 = new GameBoard(10,10,490,10);
 		nextTurnButton = new Rect(340,125,100,50);
 		yesButton = new Rect(10,60,100,50);
 		noButton = new Rect(10,120,100,50);
@@ -395,6 +408,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		}
 		else if(currentState == States.player1Turn)
 		{
+			checkGameover();
 			//player1 take your shot
 			//update based on what the shots detail
 			//change state to States.player2Turn;
@@ -414,6 +428,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		}
 		else if(currentState == States.player2Turn)
 		{
+			checkGameover();
 			//computer/player2 take your shot
 			//update based on what the shots detail
 			//change state to States.player1Turn;
@@ -439,11 +454,10 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 					}
 				}
 			}
-			
-			
 		}
 		else if(currentState == States.changingChairs)
 		{
+			checkGameover();
 			States newState;
 			if(previousState == States.placingShipsPlayer1)
 			{
@@ -475,14 +489,14 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 					if(currentState == States.player1Turn)
 					{
 						if(salvo)
-							shotsRemaining = 5;//TODO: shotsRemaining = board1.countShips();
+							shotsRemaining = board1.countShips();
 						else
 							shotsRemaining = 1;
 					}
 					if(currentState == States.player2Turn)
 					{
 						if(salvo)
-							shotsRemaining = 5;//TODO: shotsRemaining = board2.countShips();
+							shotsRemaining = board2.countShips() + 100;
 						else
 							shotsRemaining = 1;
 					}
@@ -492,22 +506,13 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		else if(currentState == States.displayWinner)
 		{
 			//TODO: determine whom is the winner
-			if(!winner)
+			if(hasClicked)
 			{
-				//player 1 won
+				if(nextTurnButton.isIn(clickedX, clickedY))
+				{
+					currentState = States.quitGame;
+				}
 			}
-			else
-			{
-				//player 2 won
-			}
-		
-			
-			
-			
-			
-			
-			
-			
 		}
 		//if all of one player's ships are destroyed
 		//change state to States.displayWinner;
@@ -517,17 +522,14 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 		//currentState = States.quitGame;
 		else if(currentState == States.quitGame)
 		{
-			
-			
-			
-			
-			
-			
 			running = false;
 		}
 		//TODO: check each board for a winner
 		hasClicked = false;
 		hasRotateClicked = false;
+	}
+	private void checkGameover()
+	{
 		if(board1.checkWin())
 		{
 			previousState = currentState;

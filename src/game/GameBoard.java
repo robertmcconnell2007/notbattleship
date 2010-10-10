@@ -278,4 +278,13 @@ public class GameBoard
 		}
 		return true;
 	}
+	public int countShips()
+	{
+		int total = 0;
+		for(int i = 0; i < 5; i++)
+			if(shipArray[i].health > 0)
+				++total;
+		return total;
+			
+	}
 }
