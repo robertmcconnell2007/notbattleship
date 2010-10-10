@@ -123,7 +123,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 
 		if(currentState == States.titleScreen)
 		{
-			Image titleScreen = Toolkit.getDefaultToolkit().getImage("battleship.gif");
+			Image titleScreen = Toolkit.getDefaultToolkit().getImage("TitleScreen.gif");
 			g.drawImage(titleScreen, 0,0, this);
 		}
 		/**
@@ -496,7 +496,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 					if(currentState == States.player2Turn)
 					{
 						if(salvo)
-							shotsRemaining = board2.countShips() + 100;
+							shotsRemaining = board2.countShips();
 						else
 							shotsRemaining = 1;
 					}
