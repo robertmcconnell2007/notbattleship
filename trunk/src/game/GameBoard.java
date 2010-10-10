@@ -80,14 +80,24 @@ public class GameBoard
 						g.setColor(new Color(255,255,0));
 						break;
 					}
-				case 4:
+				case 4://shipArray4
 					{
 						g.setColor(new Color(255,0,255));
 						break;
 					}
-				case 5:
+				case 5://water
 					{
 						g.setColor(new Color(0,0,255));
+						break;
+					}
+				case 6://hit
+					{
+						g.setColor(new Color(255,0,0));
+						break;
+					}
+				case 7://miss
+					{
+						g.setColor(new Color(255,255,255));
 						break;
 					}
 				}
@@ -143,14 +153,14 @@ public class GameBoard
 		{
 			return false;
 		}
-		if(playBoard[newX][newY] == 1)//attack made on enemy ship
+		if(playBoard[newX][newY] == 5)//attack made on open water GJ.
 		{
-			playBoard[newX][newY] = 3;
+			playBoard[newX][newY] = 7;
 			return true;
 		}
-		else if(playBoard[newX][newY] == 0)//attack made on open water GJ.
+		else if(playBoard[newX][newY] != 6 || playBoard[newX][newY] != 7 )//attack made on enemy ship
 		{
-			playBoard[newX][newY] = 2;
+			playBoard[newX][newY] = 6;
 			return true;
 		}
 		else//nothing happened with that last shot so you get another one :)
@@ -160,7 +170,7 @@ public class GameBoard
 	}
 	public boolean clickedIn(int x, int y)
 	{
-		if(x > boardX && x < boardX+boardW && y > boardY && y < boardY+boardH)
+		if(x > boardX && x < boardX+(boardW*tileSize) && y > boardY && y < boardY+(boardH*tileSize))
 			return true;
 		return false;
 	}
