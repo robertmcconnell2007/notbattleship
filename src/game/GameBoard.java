@@ -176,7 +176,7 @@ public class GameBoard
 	 * @param cX clicked x
 	 * @param cY clicked y
 	 */
-	public Boolean clickBox(int newX, int newY)
+	public boolean clickBox(int newX, int newY)
 	{
 		if(newX >= this.boardW || newY >= this.boardH)//if out of bounds, attack hasn't been made
 		{
@@ -203,7 +203,7 @@ public class GameBoard
 			return true;
 		return false;
 	}
-	public Boolean transposeShip()
+	public boolean transposeShip()
 	{
 		//if the ship is out of bounds of the board
 		if(!shipArray[shipCounter].rotated)
