@@ -17,9 +17,6 @@ import java.awt.Graphics;
  */
 public class GameBoard
 {
-	
-	Ship shipArray[];
-	
 	/**
 	 * the actual playing board
 	 */
@@ -50,8 +47,6 @@ public class GameBoard
 	 * @param g is the graphics handler
 	 * @param showShips determines whether or not the ships will show up on the board
 	 */
-	int shipCounter;
-
 	public void draw(Graphics g, Boolean showShips)
 	{
 		for(int y = 0; y < boardH; y++)
@@ -60,43 +55,36 @@ public class GameBoard
 			{
 				switch(playBoard[y][x])
 				{
-				case 0://shipArray0
+				case 0://empty
 					{
-						g.setColor(new Color(0,255,0));
+						g.setColor(new Color(0,0,255));
 						break;
 					}
-				case 1://shipArray1
+				case 1://has ship
 					{
-						g.setColor(new Color(0,100,0));
+						if(showShips)
+						{
+							g.setColor(new Color(139,137,137));
+						}
+						else
+						{
+							g.setColor(new Color(0,0,255));
+						}
 						break;
 					}
-				case 2://shipArray2
+				case 2://no hit
 					{
 						g.setColor(new Color(0,255,255));
 						break;
 					}
-				case 3://ShipArray3
+				case 3://hit
 					{
-						g.setColor(new Color(255,255,0));
-						break;
-					}
-				case 4:
-					{
-						g.setColor(new Color(255,0,255));
-						break;
-					}
-				case 5:
-					{
-						g.setColor(new Color(0,0,255));
+						g.setColor(new Color(255,0,0));
 						break;
 					}
 				}
 				g.fillRect(y*tileSize+boardX,x*tileSize+boardY,29,29);
 			}
-		}
-		if(shipCounter != -1 && showShips)
-		{
-			shipArray[shipCounter].draw(g);
 		}
 	}
 	/**
@@ -114,22 +102,12 @@ public class GameBoard
 		boardX = bX;
 		boardY = bY;
 		tileSize = 30;
-		//
-		for(int i = 0; i < boardW; i++)
+		//TODO: Take out after testing
+		for(int i = 0; i < width; i++)
 		{
-			for(int k = 0; k < boardH; k++)
-			{
-				playBoard[i][k] = 5;
-			}
+			playBoard[i][0] = 1;
 		}
 		
-		shipArray = new Ship[5];
-		shipArray[0] = new Ship(2,tileSize);
-		shipArray[1] = new Ship(3,tileSize);
-		shipArray[2] = new Ship(3,tileSize);
-		shipArray[3] = new Ship(4,tileSize);
-		shipArray[4] = new Ship(5,tileSize);
-		shipCounter = 0;
 	}
 	/**
 	 * takes input from mouse click and is able to edit the clicked box underneath
@@ -139,6 +117,7 @@ public class GameBoard
 	 */
 	public Boolean clickBox(int newX, int newY)
 	{
+		
 		if(newX >= this.boardW || newY >= this.boardH)//if out of bounds, attack hasn't been made
 		{
 			return false;
@@ -158,62 +137,13 @@ public class GameBoard
 			return false;
 		}
 	}
-	public Boolean transposeShip()
+	public boolean clickedIn(int x, int y)
 	{
-		//if the ship is out of bounds of the board
-		if(!shipArray[shipCounter].rotated)
+		if(x > boardX && x < boardX + (boardW*tileSize) && y > boardY && y < boardY + (boardH*tileSize))
 		{
-			if(shipArray[shipCounter].dX + shipArray[shipCounter].length > boardW || shipArray[shipCounter].dX < 0
-					|| shipArray[shipCounter].dY > boardH)
-			{
-				return false;
-			}
+			return true;
 		}
-		else
-		{
-			if(shipArray[shipCounter].dY + shipArray[shipCounter].length  > boardH || shipArray[shipCounter].dY < 0
-					|| shipArray[shipCounter].dX > boardW)
-			{
-				return false;
-			}
-		}
-		//if it collides with another ship
-		for(int i = 0; i < shipArray[shipCounter].length; i++)
-		{
-			if(!shipArray[shipCounter].rotated)
-			{
-				if(playBoard[shipArray[shipCounter].dX + i][shipArray[shipCounter].dY] != 5)
-				{
-					return false;
-				}
-			}
-			else
-			{
-				if(playBoard[shipArray[shipCounter].dX][shipArray[shipCounter].dY + i] != 5)
-				{
-					return false;
-				}
-			}
-		}
-		//finally transpose the ship because its all good :)
-		for(int i = 0; i < shipArray[shipCounter].length; i++)
-		{
-			if(!shipArray[shipCounter].rotated)
-			{
-				playBoard[shipArray[shipCounter].dX + i][shipArray[shipCounter].dY] = shipCounter;
-			}
-			else
-			{
-				playBoard[shipArray[shipCounter].dX][shipArray[shipCounter].dY + i] = shipCounter;
-			}
-		}
-		//increase the ship counter, put it out of bounds if no more ships to place
-		shipCounter++;
-		if(shipCounter > 4)
-		{
-			shipCounter = -1;
-		}
-		return true;
+		return false;
 	}
 }
 

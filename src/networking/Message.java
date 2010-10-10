@@ -13,7 +13,7 @@ public class Message implements Runnable
 		run,
 	}
 
-	static States currentState = States.notReady;
+	States currentState = States.notReady;
 	private PrintWriter out;
 	private BufferedReader in;
 	private Socket other;
@@ -37,6 +37,13 @@ public class Message implements Runnable
 	{
 		hostName = hostID;
 	}
+	public boolean hasMessage()
+	{
+		if(currentState == States.run)
+			if(numInMessages > 0)
+				return true;
+		return false;
+	}
 	public String getMessage()
 	{
 		String s = null;
@@ -58,6 +65,7 @@ public class Message implements Runnable
 	}
 	public void start(boolean host)
 	{
+		System.out.println("entered start");
 		if(host)
 		{
 			currentState = States.hostSetup;
@@ -66,8 +74,9 @@ public class Message implements Runnable
 		{
 			currentState = States.clientSetup;
 		}
-		Thread thread = new Thread(this);
-		thread.start();
+		Thread messageThread = new Thread(this);
+		System.out.println("New thread made, beginning new thread.");
+		messageThread.start();
 	}
 	public void run()
 	{
@@ -78,6 +87,7 @@ public class Message implements Runnable
 			case hostSetup:
 				try
 				{
+					System.out.println("Trying to listen on socket 4321");
 					listen = new ServerSocket(4321);
 				}
 				catch (IOException e)
@@ -87,7 +97,9 @@ public class Message implements Runnable
 				}
 				try
 				{
+					System.out.println("Trying to accept on listen socket.");
 					other = listen.accept();
+					System.out.println("Accept completed.");
 				}
 				catch (IOException e)
 				{
