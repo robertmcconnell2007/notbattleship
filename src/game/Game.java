@@ -295,7 +295,6 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 	 */
 	public void checkStates()
 	{
-		System.out.println(currentState);
 		if(currentState == States.titleScreen)
 		{
 			previousState = currentState;
@@ -474,14 +473,14 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 					if(currentState == States.player1Turn)
 					{
 						if(salvo)
-							shotsRemaining = 5;//shotsRemaining = board1.countShips();
+							shotsRemaining = 5;//TODO: shotsRemaining = board1.countShips();
 						else
 							shotsRemaining = 1;
 					}
 					if(currentState == States.player2Turn)
 					{
 						if(salvo)
-							shotsRemaining = 5;//shotsRemaining = board2.countShips();
+							shotsRemaining = 5;//TODO: shotsRemaining = board2.countShips();
 						else
 							shotsRemaining = 1;
 					}
