@@ -352,6 +352,17 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 			}
 			else
 			{
+				while(board2.shipCounter != -1)
+				{
+					board2.shipArray[board2.shipCounter].setPosition((int)(Math.random()*1000) % board2.boardW, (int)(Math.random()*1000) % board2.boardH);
+					for(int i = 0; i < (int)Math.random() * 1000 % 10; i++)
+					{
+						board2.shipArray[board2.shipCounter].rotate();
+					}
+					board2.transposeShip();
+				}
+				previousState = currentState;
+				currentState = States.changingChairs;
 				//TODO: put computer AI placement here
 			}
 		}
