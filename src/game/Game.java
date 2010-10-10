@@ -261,7 +261,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 				}
 			}
 			if(board1.shipCounter != -1)
-				board1.shipArray[board1.shipCounter].setPosition(clickedX/board1.tileSize , clickedY/board1.tileSize);
+				board1.shipArray[board1.shipCounter].setPosition((clickedX-board1.boardX)/board1.tileSize , (clickedY-board1.boardY)/board1.tileSize);
 		}
 		else if(currentState == States.placingShipsPlayer2)
 		{
@@ -279,7 +279,7 @@ public class Game extends JPanel implements MouseListener, Runnable, MouseMotion
 				}
 			}
 			if(board2.shipCounter != -1)
-				board2.shipArray[board2.shipCounter].setPosition(clickedX/board2.tileSize , clickedY/board2.tileSize);
+				board2.shipArray[board2.shipCounter].setPosition((clickedX-board2.boardX)/board2.tileSize , (clickedY-board2.boardY)/board2.tileSize);
 		}
 		else if(currentState == States.player1Turn)
 		{

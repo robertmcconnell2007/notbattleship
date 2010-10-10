@@ -52,21 +52,21 @@ public class Ship
 		dX = 0;
 		dY = 0;
 	}
-	public void draw(Graphics g)
+	public void draw(Graphics g, int bX, int bY)
 	{
 		g.setColor(new Color(139,137,137));
 		if(!rotated)
 		{
 			for(int i = 0; i < length; i++)
 			{
-				g.fillRect(i*dSize+dX*dSize,dY*dSize,dSize - 1,dSize - 1);
+				g.fillRect((i*dSize+dX*dSize)+bX ,(dY*dSize)+bY ,dSize - 1 ,dSize - 1);
 			}
 		}
 		else
 		{
 			for(int i = 0; i < length; i++)
 			{
-				g.fillRect(dX*dSize, dY*dSize + i * dSize, dSize - 1, dSize - 1);
+				g.fillRect((dX*dSize)+bX, (dY*dSize + i * dSize) + bY, dSize - 1, dSize - 1);
 			}
 		}
 	}
