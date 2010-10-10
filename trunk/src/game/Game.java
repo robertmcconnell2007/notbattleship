@@ -1,6 +1,5 @@
 package game;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -13,12 +12,13 @@ import networking.Message;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 /*
  * Game will create game boards in order to play
  * if playing single-player, game will create 2 GameBoards
  * if playing multi-player, game will set up networking
  */
-public class Game extends JPanel implements MouseListener, Runnable
+public class Game extends JPanel implements MouseListener, Runnable, MouseMotionListener
 {
 	/**
 	 * 
@@ -46,7 +46,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 	 * sets up the current state the game is in.
 	 * Default: titleScreen
 	 */
-	static States currentState = States.networkTest;
+	static States currentState = States.titleScreen;
 	
 	/**
 	 * holds the previous state just in case we need it
@@ -76,7 +76,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.add(g);
-		otherPlayer.start(true);
+		//otherPlayer.start(true);
 	
 		
 	}
@@ -119,6 +119,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		board1 = new GameBoard(10,10,0,0);
 		board2 = new GameBoard(10,10,480,0);
 		addMouseListener(this);
+		addMouseMotionListener(this);
 		Thread thread = new Thread(this);
 		thread.start();
 	}
@@ -186,13 +187,13 @@ public class Game extends JPanel implements MouseListener, Runnable
 		{
 			if(previousState == States.titleScreen)//if the previous state was just the title, then move on to the real game. TODO: Place ships state needs to start here
 			{
-				currentState = States.player1Turn;
+				currentState = States.placingShips;
 			}
 			else if(previousState == States.player1Turn)//if the previous state was player1 taking a turn, assume that player1 just made an attack
 			{
 				if(clickedX > board2.boardX)//check to make sure it was done on board2
 				{
-					if(board2.clickBox( (clickedX - board2.boardX)/board2.tileSize , clickedY/board2.tileSize))//valid attack was made TODO: if board 2 is moved, this needs to be fixed
+					if(board2.clickBox((clickedX - board2.boardX)/board2.tileSize , clickedY/board2.tileSize))//valid attack was made TODO: if board 2 is moved, this needs to be fixed
 					{
 						player1 = !player1;//switch players
 					}
@@ -201,14 +202,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 						currentState = States.player1Turn;//return back to player1 and make him attempt to move again
 					}
 				}
-			}
-			
-			
-			
-			
-			
-			
-			
+			}	
 		}
 		else if(currentState == States.placingShips)
 		{
@@ -237,7 +231,6 @@ public class Game extends JPanel implements MouseListener, Runnable
 			//change state to States.player1Turn;
 			//currentState = States.player1Turn;
 		}
-		
 		//if all of one player's ships are destroyed
 		//change state to States.displayWinner;
 		//currentState = States.displayWinner;
@@ -248,45 +241,76 @@ public class Game extends JPanel implements MouseListener, Runnable
 		{
 			running = false;
 		}
+
 		
-		//TODO: take this out later
-		else if(currentState == States.networkTest)
+		/*if(currentState != States.placingShips)
 		{
-			String t = otherPlayer.getMessage();
-			if(t != null)
-				otherPlayer.sendMessage(t);
-		}
-		
-		
-		if(player1)
-		{
-			currentState = States.player1Turn;
-		}
-		else
-		{
-			currentState = States.player2Turn;
-		}
+			if(player1)
+			{
+				currentState = States.player1Turn;
+			}
+			else
+			{
+				currentState = States.player2Turn;
+			}
+		}*/
 	}
 
 	public void mouseClicked(MouseEvent e)
 	{
+		if(currentState == States.placingShips)
+		{
+			if(e.getButton() == e.BUTTON3)
+			{
+				board1.shipArray[board1.shipCounter].rotate();
+			}
+			else if(e.getButton() == e.BUTTON1)
+			{
+				if(board1.transposeShip())
+				{
+					if(board1.shipCounter == -1)
+					{
+						currentState = States.player1Turn;
+					}
+				}
+			}
+		}
+		currentState = States.handleClick;
+		clickedX = e.getX();
+		clickedY = e.getY();
+		
 	}
 	public void mouseEntered(MouseEvent e)
 	{
 	}
+	
 	public void mouseExited(MouseEvent e)
 	{
 	}
 	public void mousePressed(MouseEvent e)
 	{
-		currentState = States.handleClick;
+		/*currentState = States.handleClick;
 		clickedX = e.getX();
 		clickedY = e.getY();
 		System.out.println(e.getX() + " " + e.getY());
-		repaint();
+		repaint();*/
 	}
 	public void mouseReleased(MouseEvent e)
 	{		
+	}
+	
+	public void mouseDragged(MouseEvent e)
+	{
+	}
+	
+	public void mouseMoved(MouseEvent e) 
+	{
+		if(currentState == States.placingShips && board1.shipCounter != -1)
+		{
+			clickedX = e.getX();
+			clickedY = e.getY();
+			board1.shipArray[board1.shipCounter].setPosition(clickedX/board1.tileSize , clickedY/board1.tileSize);
+		}
 	}
 	
 	
