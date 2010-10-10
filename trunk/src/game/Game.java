@@ -37,6 +37,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		handleClick,
 		displayWinner,
 		quitGame,
+		networkTest,
 	}
 	static Message otherPlayer;
 	static GameBoard board1;
@@ -45,7 +46,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 	 * sets up the current state the game is in.
 	 * Default: titleScreen
 	 */
-	static States currentState = States.titleScreen;
+	static States currentState = States.networkTest;
 	
 	/**
 	 * holds the previous state just in case we need it
@@ -75,6 +76,7 @@ public class Game extends JPanel implements MouseListener, Runnable
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.add(g);
+		otherPlayer.start(true);
 	
 		
 	}
@@ -245,6 +247,14 @@ public class Game extends JPanel implements MouseListener, Runnable
 		else if(currentState == States.quitGame)
 		{
 			running = false;
+		}
+		
+		//TODO: take this out later
+		else if(currentState == States.networkTest)
+		{
+			String t = otherPlayer.getMessage();
+			if(t != null)
+				otherPlayer.sendMessage(t);
 		}
 		
 		
