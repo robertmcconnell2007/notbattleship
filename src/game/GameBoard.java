@@ -182,19 +182,19 @@ public class GameBoard
 		{
 			return false;
 		}
-		if(playBoard[newX][newY] == 5)//attack made on open water GJ.
+		if(playBoard[newX][newY] == 7 || playBoard[newX][newY] == 6)//targeted a hit or miss
+		{
+			return false;
+		}
+		else if(playBoard[newX][newY] == 5)//attack made on open water GJ.
 		{
 			playBoard[newX][newY] = 7;
 			return true;
 		}
-		else if(playBoard[newX][newY] != 6 || playBoard[newX][newY] != 7 )//attack made on enemy ship
+		else
 		{
 			playBoard[newX][newY] = 6;
 			return true;
-		}
-		else//nothing happened with that last shot so you get another one :)
-		{
-			return false;
 		}
 	}
 	public boolean clickedIn(int x, int y)
